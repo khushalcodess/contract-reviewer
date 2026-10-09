@@ -5,11 +5,11 @@ from src.embed import cached_chunk_embeddings, embed_query
 from src.queries import CLAUSE_QUERIES
 
 
-def make_dense_ranker(size=1000, overlap=200):
-    tag = f"fixed-{size}-{overlap}"
+def make_dense_ranker(chunker=None, tag="fixed-1000-200"):
+    chunker = chunker or fixed_chunks
 
     def ranker(contract, clause):
-        chunks = fixed_chunks(contract["text"], size, overlap)
+        chunks = chunker(contract["text"])
         vecs = cached_chunk_embeddings(contract["title"], chunks, tag)
         q = embed_query(CLAUSE_QUERIES[clause])
         scores = vecs @ q
