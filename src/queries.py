@@ -7,3 +7,12 @@ CLAUSE_QUERIES = {
     "Cap On Liability": "Is there a limit or cap on the amount of damages or liability a party can be responsible for?",
     "Uncapped Liability": "Is a party's liability unlimited or excluded from the cap on liability?",
 }
+CLAUSE_KEYWORDS = {
+    "Governing Law": "governed by construed in accordance with laws of the state jurisdiction courts governing law venue",
+    "Renewal Term": "automatically renew renewal term successive additional period extended unless notice",
+    "Notice Period To Terminate Renewal": "written notice of non-renewal days prior to expiration terminate renewal not to renew",
+    "Termination For Convenience": "terminate this agreement at any time without cause for convenience upon written notice days",
+    "Non-Compete": "shall not compete competing business competitive restrict directly or indirectly non-compete",
+    "Cap On Liability": "limitation of liability in no event shall liable aggregate liability not exceed damages",
+    "Uncapped Liability": "unlimited liability not subject to limitation exceptions gross negligence willful misconduct indemnification",
+}
