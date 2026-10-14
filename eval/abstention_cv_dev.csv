@@ -1,0 +1,43 @@
+target,clause,signal,auc,found_when_present,false_alarm
+0.9,Governing Law,dense_q,0.933,0.9,0.24
+0.9,Governing Law,dense_kw,0.954,0.89,0.12
+0.9,Governing Law,bm25,0.985,0.9,0.06
+0.9,Renewal Term,dense_q,0.815,0.9,0.59
+0.9,Renewal Term,dense_kw,0.849,0.89,0.51
+0.9,Renewal Term,bm25,0.879,0.9,0.45
+0.9,Notice Period To Terminate Renewal,dense_q,0.776,0.9,0.55
+0.9,Notice Period To Terminate Renewal,dense_kw,0.757,0.89,0.56
+0.9,Notice Period To Terminate Renewal,bm25,0.792,0.89,0.61
+0.9,Termination For Convenience,dense_q,0.653,0.9,0.69
+0.9,Termination For Convenience,dense_kw,0.682,0.9,0.59
+0.9,Termination For Convenience,bm25,0.722,0.9,0.65
+0.9,Non-Compete,dense_q,0.801,0.88,0.45
+0.9,Non-Compete,dense_kw,0.814,0.88,0.61
+0.9,Non-Compete,bm25,0.815,0.89,0.45
+0.9,Cap On Liability,dense_q,0.891,0.9,0.34
+0.9,Cap On Liability,dense_kw,0.888,0.89,0.36
+0.9,Cap On Liability,bm25,0.932,0.9,0.24
+0.9,Uncapped Liability,dense_q,0.829,0.89,0.42
+0.9,Uncapped Liability,dense_kw,0.855,0.9,0.36
+0.9,Uncapped Liability,bm25,0.785,0.88,0.5
+0.95,Governing Law,dense_q,0.933,0.95,0.31
+0.95,Governing Law,dense_kw,0.954,0.95,0.25
+0.95,Governing Law,bm25,0.985,0.94,0.1
+0.95,Renewal Term,dense_q,0.815,0.94,0.68
+0.95,Renewal Term,dense_kw,0.849,0.94,0.62
+0.95,Renewal Term,bm25,0.879,0.92,0.59
+0.95,Notice Period To Terminate Renewal,dense_q,0.776,0.9,0.65
+0.95,Notice Period To Terminate Renewal,dense_kw,0.757,0.94,0.64
+0.95,Notice Period To Terminate Renewal,bm25,0.792,0.94,0.64
+0.95,Termination For Convenience,dense_q,0.653,0.94,0.75
+0.95,Termination For Convenience,dense_kw,0.682,0.95,0.68
+0.95,Termination For Convenience,bm25,0.722,0.95,0.7
+0.95,Non-Compete,dense_q,0.801,0.93,0.52
+0.95,Non-Compete,dense_kw,0.814,0.95,0.68
+0.95,Non-Compete,bm25,0.815,0.93,0.54
+0.95,Cap On Liability,dense_q,0.891,0.94,0.46
+0.95,Cap On Liability,dense_kw,0.888,0.94,0.49
+0.95,Cap On Liability,bm25,0.932,0.95,0.33
+0.95,Uncapped Liability,dense_q,0.829,0.93,0.5
+0.95,Uncapped Liability,dense_kw,0.855,0.95,0.46
+0.95,Uncapped Liability,bm25,0.785,0.94,0.61
