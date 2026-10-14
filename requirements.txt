@@ -80,12 +80,15 @@ packaging==26.3
 pandas==3.0.6
 pandocfilters==1.5.1
 parso==0.8.7
+pgvector==0.5.1
 pillow==12.3.0
 platformdirs==4.12.2
 pluggy==1.6.0
 prometheus_client==0.26.0
 prompt_toolkit==3.0.53
 psutil==7.2.2
+psycopg==3.3.6
+psycopg-binary==3.3.6
 pure_eval==0.2.4
 pycparser==3.0
 Pygments==2.21.0
