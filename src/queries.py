@@ -6,6 +6,7 @@ CLAUSE_QUERIES = {
     "Non-Compete": "Is a party restricted from competing with the other party or engaging in a competing business?",
     "Cap On Liability": "Is there a limit or cap on the amount of damages or liability a party can be responsible for?",
     "Uncapped Liability": "Is a party's liability unlimited or excluded from the cap on liability?",
+    "Indemnification": "Does a party agree to indemnify, defend, or hold harmless the other party against claims, losses, or damages brought by third parties?",  # NEW
 }
 CLAUSE_KEYWORDS = {
     "Governing Law": "governed by construed in accordance with laws of the state jurisdiction courts governing law venue",
@@ -15,4 +16,5 @@ CLAUSE_KEYWORDS = {
     "Non-Compete": "shall not compete competing business competitive restrict directly or indirectly non-compete",
     "Cap On Liability": "limitation of liability in no event shall liable aggregate liability not exceed damages",
     "Uncapped Liability": "unlimited liability not subject to limitation exceptions gross negligence willful misconduct indemnification",
+    "Indemnification": "indemnify defend hold harmless indemnification third party claims losses damages intellectual property infringement",  # NEW
 }
