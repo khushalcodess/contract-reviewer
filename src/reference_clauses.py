@@ -121,4 +121,24 @@ REFERENCE = {
         ],
         "safe_wording": "Either party may stop this Agreement from renewing by giving written notice, including by email, at least [30] days before the end of the then-current term. The Provider will send the Customer a written reminder of the renewal date and this deadline at least [60] days before the end of each term.",
     },
+    "Indemnification": {
+        "standard": "Indemnification means one party agrees to cover the other party's losses from claims by outsiders (third parties). A balanced clause is mutual or favors the customer, covers only third-party claims, and has a clear procedure: prompt notice, the indemnifying party controls the defense, and no settlement without the other party's consent. The provider typically indemnifies the customer for claims that the product infringes someone's intellectual property. Note: a plain promise to pay for the other party's own direct losses is not indemnification, and it does not cover losses caused by the protected party's own negligence.",
+        "high_risk": [
+            "Only the customer indemnifies the provider, and the provider gives no indemnity in return",
+            "The customer must cover any and all losses arising out of or related to the agreement, with no limit to third-party claims",
+            "The indemnity covers losses caused by the provider's own negligence or willful misconduct",
+            "The indemnity is unlimited and is excluded from any liability cap",
+            "The provider can settle claims without the customer's consent, or the customer must pay legal fees without being able to control the defense",
+        ],
+        "medium_risk": [
+            "A mutual indemnity that is broader than third-party claims, such as covering any breach of the agreement",
+            "An indemnity that covers third-party claims but has no clear procedure for notice, defense, or settlement",
+            "The provider indemnifies for intellectual property claims, but with broad exceptions that cover most realistic cases",
+        ],
+        "low_risk": [
+            "The provider indemnifies the customer for third-party intellectual property infringement claims, with a clear procedure",
+            "A mutual indemnity limited to third-party claims caused by each party's own negligence, willful misconduct, or violation of law",
+        ],
+        "safe_wording": "Each party (the Indemnifying Party) will defend and indemnify the other party against third-party claims to the extent caused by the Indemnifying Party's gross negligence, willful misconduct, or violation of law. The Provider will also defend and indemnify the Customer against third-party claims that the Services infringe intellectual property rights. The indemnified party must give prompt written notice, the Indemnifying Party controls the defense, and neither party may settle a claim in a way that imposes obligations on the other without that party's written consent.",
+    },
 }
