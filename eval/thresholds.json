@@ -1,37 +1,9 @@
-{
-  "Governing Law": {
-    "signal": "bm25",
-    "threshold": 8.7787,
-    "target_recall": 0.9
-  },
-  "Renewal Term": {
-    "signal": "bm25",
-    "threshold": 6.6725,
-    "target_recall": 0.9
-  },
-  "Notice Period To Terminate Renewal": {
-    "signal": "dense_q",
-    "threshold": 0.6661,
-    "target_recall": 0.9
-  },
-  "Termination For Convenience": {
-    "signal": "dense_kw",
-    "threshold": 0.698,
-    "target_recall": 0.9
-  },
-  "Non-Compete": {
-    "signal": "dense_q",
-    "threshold": 0.6364,
-    "target_recall": 0.9
-  },
-  "Cap On Liability": {
-    "signal": "bm25",
-    "threshold": 10.0119,
-    "target_recall": 0.9
-  },
-  "Uncapped Liability": {
-    "signal": "dense_kw",
-    "threshold": 0.6831,
-    "target_recall": 0.9
-  }
+﻿{
+  "Governing Law": {"signal": "bm25", "threshold": 8.7787, "target_recall": 0.9},
+  "Renewal Term": {"signal": null, "threshold": null, "target_recall": null},
+  "Notice Period To Terminate Renewal": {"signal": null, "threshold": null, "target_recall": null},
+  "Termination For Convenience": {"signal": null, "threshold": null, "target_recall": null},
+  "Non-Compete": {"signal": null, "threshold": null, "target_recall": null},
+  "Cap On Liability": {"signal": "bm25", "threshold": 10.0119, "target_recall": 0.9},
+  "Uncapped Liability": {"signal": null, "threshold": null, "target_recall": null}
 }
