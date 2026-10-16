@@ -1,4 +1,4 @@
-﻿{
+{
   "Governing Law": {"signal": "bm25", "threshold": 8.7787, "target_recall": 0.9},
   "Renewal Term": {"signal": null, "threshold": null, "target_recall": null},
   "Notice Period To Terminate Renewal": {"signal": null, "threshold": null, "target_recall": null},
