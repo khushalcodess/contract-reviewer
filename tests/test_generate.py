@@ -57,3 +57,15 @@ def test_garbage_twice_returns_none():
 def test_prompt_wraps_passages_in_tags():
     p = build_prompt("Governing Law", PASSAGES)
     assert "<passages>" in p and "Illinois" in p
+
+def test_prompt_contains_rubric_and_customer():
+    p = build_prompt("Governing Law", PASSAGES, customer="Acme Corp")
+    assert "Acme Corp" in p and "- Low:" in p and "- High:" in p
+
+
+def test_prompt_without_customer_says_not_to_guess():
+    assert "not named" in build_prompt("Governing Law", PASSAGES)
+
+
+def test_old_example_lists_are_gone():
+    assert "High risk examples" not in build_prompt("Governing Law", PASSAGES)

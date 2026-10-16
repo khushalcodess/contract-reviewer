@@ -1,4 +1,4 @@
-import time
+﻿import time
 from typing import Literal, Optional
 
 from pydantic import BaseModel
@@ -17,7 +17,7 @@ class ClauseResult(BaseModel):
 
 
 def review_contract(contract, hybrid, signal_rankers, thresholds, llm,
-                    clauses=None, k=3, pause=0.0):
+                    clauses=None, k=3, pause=0.0, customer=None):
     results = []
     for clause in clauses or list(REFERENCE):
         rule = thresholds.get(clause)
@@ -34,7 +34,7 @@ def review_contract(contract, hybrid, signal_rankers, thresholds, llm,
             continue
 
         passages = hybrid(contract, clause)[:k]
-        finding = review_clause(contract["text"], clause, passages, llm)
+        finding = review_clause(contract["text"], clause, passages, llm, customer=customer)
         if finding is None:
             results.append(ClauseResult(clause=clause, status="unverified", decided_by="verifier"))
         else:
