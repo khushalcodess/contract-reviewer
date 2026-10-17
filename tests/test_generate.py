@@ -69,3 +69,7 @@ def test_prompt_without_customer_says_not_to_guess():
 
 def test_old_example_lists_are_gone():
     assert "High risk examples" not in build_prompt("Governing Law", PASSAGES)
+
+def test_prompt_has_not_this_clause_hint():
+    assert "Not this clause" in build_prompt("Non-Compete", PASSAGES)
+    assert "Not this clause" not in build_prompt("Governing Law", PASSAGES)

@@ -21,11 +21,18 @@ FORMAT = """Return JSON with exactly these keys:
 {"clause": "<clause name>", "found": true or false, "risk_level": "Low" or "Medium" or "High", "explanation": "2-3 plain-language sentences that name the rule you applied", "cited_text": "<exact words from a passage>", "suggested_redline": "<safer wording for this clause>"}
 If found is false, set every key except clause and found to null."""
 
+NOT_THIS = {
+    "Non-Compete": "Exclusivity or endorsement restrictions (for example a promise not to endorse, license or market other companies in a category) are NOT a non-compete unless the text restricts a party from competing in a business. Confidentiality and non-solicit duties are not non-competes either.",
+    "Termination For Convenience": "A right to terminate only if a specific condition is met, or only for breach, is NOT termination for convenience. The text must let a party end the agreement without needing a reason.",
+    "Uncapped Liability": "A promise to reimburse or hold harmless (an indemnity) is NOT an uncapped-liability clause. Answer found=true only if the text says liability is unlimited, uncapped, or not subject to the cap.",
+}
 
 def _rubric_text(clause, rubric):
     r = rubric[clause]
     lines = [f"- {lvl}: {r[lvl]}" for lvl in ("Low", "Medium", "High")]
     lines += [f"- Note: {n}" for n in r["notes"]]
+    if clause in NOT_THIS:
+        lines.append(f"- Not this clause: {NOT_THIS[clause]}")
     return "\n".join(lines)
 
 
