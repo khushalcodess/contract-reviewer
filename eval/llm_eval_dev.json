@@ -1,0 +1,165 @@
+{
+  "split": "dev",
+  "model": "gemini-3.5-flash-lite",
+  "date": "2026-10-17",
+  "items": {
+    "items_total": 40,
+    "items_labeled": 40,
+    "items_marked_NA": 0,
+    "found_rate": {
+      "k": 38,
+      "n": 40,
+      "rate": 0.95,
+      "ci95": [
+        0.835,
+        0.986
+      ]
+    },
+    "risk_accuracy": {
+      "k": 25,
+      "n": 40,
+      "rate": 0.625,
+      "ci95": [
+        0.47,
+        0.758
+      ]
+    },
+    "accuracy_when_found": {
+      "k": 25,
+      "n": 38,
+      "rate": 0.658,
+      "ci95": [
+        0.499,
+        0.788
+      ]
+    },
+    "within_one_level_when_found": {
+      "k": 38,
+      "n": 38,
+      "rate": 1.0,
+      "ci95": [
+        0.908,
+        1.0
+      ]
+    },
+    "unverified_rate": {
+      "k": 0,
+      "n": 40,
+      "rate": 0.0,
+      "ci95": [
+        -0.0,
+        0.088
+      ]
+    },
+    "first_try_failure_rate": {
+      "k": 0,
+      "n": 40,
+      "rate": 0.0,
+      "ci95": [
+        -0.0,
+        0.088
+      ]
+    },
+    "citation_overlaps_lawyer_span": {
+      "k": 28,
+      "n": 38,
+      "rate": 0.737,
+      "ci95": [
+        0.58,
+        0.85
+      ]
+    },
+    "confusion": {
+      "Medium": {
+        "Medium": 11,
+        "High": 7
+      },
+      "High": {
+        "Medium": 3,
+        "High": 10,
+        "not_found": 2
+      },
+      "Low": {
+        "Low": 4,
+        "Medium": 3
+      }
+    }
+  },
+  "absent": {
+    "overall": {
+      "k": 4,
+      "n": 56,
+      "rate": 0.071,
+      "ci95": [
+        0.028,
+        0.17
+      ]
+    },
+    "blocked_by_gate": 10,
+    "by_clause": {
+      "Cap On Liability": {
+        "k": 0,
+        "n": 8,
+        "rate": 0.0,
+        "ci95": [
+          0.0,
+          0.324
+        ]
+      },
+      "Governing Law": {
+        "k": 0,
+        "n": 8,
+        "rate": 0.0,
+        "ci95": [
+          0.0,
+          0.324
+        ]
+      },
+      "Non-Compete": {
+        "k": 2,
+        "n": 8,
+        "rate": 0.25,
+        "ci95": [
+          0.071,
+          0.591
+        ]
+      },
+      "Notice Period To Terminate Renewal": {
+        "k": 0,
+        "n": 8,
+        "rate": 0.0,
+        "ci95": [
+          0.0,
+          0.324
+        ]
+      },
+      "Renewal Term": {
+        "k": 0,
+        "n": 8,
+        "rate": 0.0,
+        "ci95": [
+          0.0,
+          0.324
+        ]
+      },
+      "Termination For Convenience": {
+        "k": 1,
+        "n": 8,
+        "rate": 0.125,
+        "ci95": [
+          0.022,
+          0.471
+        ]
+      },
+      "Uncapped Liability": {
+        "k": 1,
+        "n": 8,
+        "rate": 0.125,
+        "ci95": [
+          0.022,
+          0.471
+        ]
+      }
+    }
+  }
+}
