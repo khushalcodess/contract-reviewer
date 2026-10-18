@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Literal
 
 from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from src import app_db
@@ -31,6 +32,13 @@ async def lifespan(app):
 
 
 app = FastAPI(title="Contract Risk Reviewer", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def process_contract(contract_id):
@@ -136,3 +144,9 @@ def metrics():
     return {"retrieval_dev": _read_csv("results_summary_dev.csv"),
             "llm_dev": _read_json("llm_eval_dev.json"),
             "llm_test": _read_json("llm_eval_test.json")}
+
+@app.delete("/contracts/{cid}")
+def remove_contract(cid: int):
+    if app_db.delete_contract(cid) == 0:
+        raise HTTPException(404, "Contract not found")
+    return {"ok": True}

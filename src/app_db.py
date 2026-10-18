@@ -112,3 +112,17 @@ def set_decision(contract_id, clause, decision):
         cur = conn.execute("UPDATE findings SET decision = %s WHERE contract_id = %s AND clause = %s",
                            (decision, contract_id, clause))
     return cur.rowcount
+
+def delete_contract(contract_id):
+    with connect() as conn:
+        row = conn.execute("SELECT title FROM contracts WHERE id = %s", (contract_id,)).fetchone()
+        if row is None:
+            return 0
+        title = row[0]
+        conn.execute("DELETE FROM contracts WHERE id = %s", (contract_id,))
+        still_used = conn.execute(
+            "SELECT 1 FROM contracts WHERE title = %s LIMIT 1", (title,)
+        ).fetchone()
+        if not still_used and title.startswith("upload-"):
+            conn.execute("DELETE FROM chunks WHERE contract_title = %s", (title,))
+    return 1
