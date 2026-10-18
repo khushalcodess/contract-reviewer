@@ -5,6 +5,15 @@ from psycopg.types.json import Jsonb
 from src.db import connect
 
 SCHEMA = """
+
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE contracts ADD COLUMN IF NOT EXISTS user_id INT REFERENCES users(id) ON DELETE CASCADE;
+
 CREATE TABLE IF NOT EXISTS contracts (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
@@ -76,12 +85,30 @@ def get_contract(contract_id, with_text=False):
     return d
 
 
-def list_contracts(limit=50):
+def list_contracts(user_id, limit=50):
+    sql = """
+    SELECT c.id, c.filename, c.status, c.created_at,
+      COUNT(*) FILTER (WHERE f.result->>'status' = 'found'
+                       AND f.result->'finding'->>'risk_level' = 'High'),
+      COUNT(*) FILTER (WHERE f.result->>'status' = 'found'
+                       AND f.result->'finding'->>'risk_level' = 'Medium'),
+      COUNT(*) FILTER (WHERE f.result->>'status' = 'found'
+                       AND f.result->'finding'->>'risk_level' = 'Low'),
+      COUNT(*) FILTER (WHERE f.result->>'status' = 'unverified')
+    FROM contracts c
+    LEFT JOIN findings f ON f.contract_id = c.id
+    WHERE c.user_id = %s
+    GROUP BY c.id
+    ORDER BY c.id DESC
+    LIMIT %s
+    """
     with connect() as conn:
-        rows = conn.execute("SELECT id, filename, status, created_at FROM contracts "
-                            "ORDER BY id DESC LIMIT %s", (limit,)).fetchall()
-    return [{"id": i, "filename": f, "status": s, "created_at": c.isoformat()}
-            for i, f, s, c in rows]
+        rows = conn.execute(sql, (user_id, limit)).fetchall()
+    return [
+        {"id": i, "filename": fn, "status": s, "created_at": c.isoformat(),
+         "summary": {"high": h, "medium": m, "low": lo, "check": ch}}
+        for i, fn, s, c, h, m, lo, ch in rows
+    ]
 
 
 def has_chunks(conn, title, tag):
@@ -126,3 +153,35 @@ def delete_contract(contract_id):
         if not still_used and title.startswith("upload-"):
             conn.execute("DELETE FROM chunks WHERE contract_title = %s", (title,))
     return 1
+
+def create_user(email, password_hash):
+    with connect() as conn:
+        row = conn.execute(
+            "INSERT INTO users (email, password_hash) VALUES (%s, %s) "
+            "ON CONFLICT (email) DO NOTHING RETURNING id",
+            (email, password_hash),
+        ).fetchone()
+    return row[0] if row else None
+
+
+def get_user_by_email(email):
+    with connect() as conn:
+        return conn.execute(
+            "SELECT id, password_hash FROM users WHERE email = %s", (email,)
+        ).fetchone()
+
+def create_contract(filename, text, page_starts, customer, user_id):
+    with connect() as conn:
+        row = conn.execute(
+            "INSERT INTO contracts (title, filename, text, page_starts, customer, user_id) "
+            "VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
+            (content_title(text), filename, text, Jsonb(page_starts), customer, user_id),
+        ).fetchone()
+    return row[0]
+
+def contract_owner(contract_id):
+    with connect() as conn:
+        row = conn.execute(
+            "SELECT user_id FROM contracts WHERE id = %s", (contract_id,)
+        ).fetchone()
+    return row[0] if row else None

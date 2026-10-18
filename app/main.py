@@ -1,15 +1,16 @@
 import csv
 import json
+import re
 from contextlib import asynccontextmanager
 from functools import partial
 from pathlib import Path
 from typing import Literal
 
-from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from src import app_db
+from src import app_db, auth
 from src.abstain import load_thresholds
 from src.bm25 import make_bm25_ranker
 from src.chunking import clause_chunks
@@ -61,50 +62,104 @@ def process_contract(contract_id):
         app_db.set_status(contract_id, "failed", f"{type(e).__name__}: {e}"[:500])
 
 
+# ---------- auth ----------
+
+class Credentials(BaseModel):
+    email: str
+    password: str
+
+
+def _clean_email(email):
+    email = email.strip().lower()
+    if len(email) > 254 or not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+        raise HTTPException(400, "Enter a valid email")
+    return email
+
+
+@app.post("/auth/signup")
+def signup(body: Credentials):
+    email = _clean_email(body.email)
+    if not 8 <= len(body.password) <= 128:
+        raise HTTPException(400, "Password must be 8 to 128 characters")
+    uid = app_db.create_user(email, auth.hash_password(body.password))
+    if uid is None:
+        raise HTTPException(409, "This email is already registered")
+    return {"token": auth.make_token(uid)}
+
+
+@app.post("/auth/login")
+def login(body: Credentials):
+    row = app_db.get_user_by_email(body.email.strip().lower())
+    if row is None or not auth.verify_password(body.password, row[1]):
+        raise HTTPException(401, "Wrong email or password")
+    return {"token": auth.make_token(row[0])}
+
+
+def current_user(authorization: str = Header(default="")):
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(401, "Please log in")
+    uid = auth.read_token(authorization[7:])
+    if uid is None:
+        raise HTTPException(401, "Please log in again")
+    return uid
+
+
+def own(cid, uid):
+    if app_db.contract_owner(cid) != uid:
+        raise HTTPException(404, "Contract not found")
+
+
+# ---------- contracts ----------
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
 
 @app.post("/contracts")
-def upload(background: BackgroundTasks, file: UploadFile = File(...), customer: str = Form("")):
+def upload(background: BackgroundTasks, file: UploadFile = File(...),
+           customer: str = Form(""), uid: int = Depends(current_user)):
     data = file.file.read(MAX_BYTES + 1)
     try:
         text, page_starts = extract_text(file.filename or "", data)
     except UploadError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    cid = app_db.create_contract(file.filename, text, page_starts, customer.strip() or None)
+    cid = app_db.create_contract(file.filename, text, page_starts,
+                                 customer.strip() or None, uid)
     background.add_task(process_contract, cid)
     return {"id": cid, "status": "processing"}
 
 
 @app.get("/contracts")
-def contracts():
-    return app_db.list_contracts()
+def contracts(uid: int = Depends(current_user)):
+    return app_db.list_contracts(uid)
 
 
 @app.get("/contracts/{cid}")
-def contract(cid: int):
+def contract(cid: int, uid: int = Depends(current_user)):
+    own(cid, uid)
     meta = app_db.get_contract(cid)
-    if meta is None:
-        raise HTTPException(404, "Contract not found")
     meta.pop("page_starts", None)
     return meta
 
 
 @app.get("/contracts/{cid}/text")
-def contract_text(cid: int):
-    row = app_db.get_contract(cid, with_text=True)
-    if row is None:
-        raise HTTPException(404, "Contract not found")
-    return {"text": row["text"]}
+def contract_text(cid: int, uid: int = Depends(current_user)):
+    own(cid, uid)
+    return {"text": app_db.get_contract(cid, with_text=True)["text"]}
+
+
+@app.delete("/contracts/{cid}")
+def remove_contract(cid: int, uid: int = Depends(current_user)):
+    own(cid, uid)
+    app_db.delete_contract(cid)
+    return {"ok": True}
 
 
 @app.get("/contracts/{cid}/findings")
-def findings(cid: int):
+def findings(cid: int, uid: int = Depends(current_user)):
+    own(cid, uid)
     meta = app_db.get_contract(cid)
-    if meta is None:
-        raise HTTPException(404, "Contract not found")
     out = []
     for f in app_db.get_findings(cid):
         res = f["result"]
@@ -119,34 +174,42 @@ class Decision(BaseModel):
 
 
 @app.post("/contracts/{cid}/findings/{clause}/decision")
-def decide(cid: int, clause: str, body: Decision):
+def decide(cid: int, clause: str, body: Decision, uid: int = Depends(current_user)):
+    own(cid, uid)
     if app_db.set_decision(cid, clause, body.decision) == 0:
         raise HTTPException(404, "Finding not found")
     return {"ok": True}
 
 
-def _read_csv(name):
-    p = EVAL_DIR / name
-    if not p.exists():
-        return []
-    with open(p, encoding="utf-8-sig", newline="") as f:
-        return [{("system" if k == "" else k): v for k, v in row.items()}
-                for row in csv.DictReader(f)]
-
+# ---------- metrics (result files only, no contract data) ----------
 
 def _read_json(name):
     p = EVAL_DIR / name
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
 
 
+def _retrieval(split):
+    out = []
+    for p in sorted(EVAL_DIR.glob(f"results_*_{split}.csv")):
+        name = p.stem[len("results_"):-len(f"_{split}")]
+        if name == "summary":
+            continue
+        with open(p, encoding="utf-8-sig", newline="") as f:
+            rows = list(csv.DictReader(f))
+        if not rows:
+            continue
+        try:
+            vals = {k: [float(r[k]) for r in rows] for k in ("hit@1", "hit@3", "mrr")}
+        except (KeyError, ValueError):
+            continue
+        out.append({"system": name, "clauses": len(rows),
+                    **{k: round(sum(v) / len(v), 3) for k, v in vals.items()}})
+    return out
+
+
 @app.get("/metrics")
 def metrics():
-    return {"retrieval_dev": _read_csv("results_summary_dev.csv"),
+    return {"retrieval_dev": _retrieval("dev"),
+            "retrieval_test": _retrieval("test"),
             "llm_dev": _read_json("llm_eval_dev.json"),
             "llm_test": _read_json("llm_eval_test.json")}
-
-@app.delete("/contracts/{cid}")
-def remove_contract(cid: int):
-    if app_db.delete_contract(cid) == 0:
-        raise HTTPException(404, "Contract not found")
-    return {"ok": True}
