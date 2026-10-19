@@ -1,0 +1,10 @@
+.venv
+.git
+data
+notebooks
+frontend
+__pycache__
+.pytest_cache
+.env
+*.zip
+*.pdf

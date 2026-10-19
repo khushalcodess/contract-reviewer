@@ -1,0 +1,41 @@
+name: contract-prod
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: contracts
+      POSTGRES_PASSWORD: contracts_dev
+      POSTGRES_DB: contracts
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U contracts -d contracts"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://contracts:contracts_dev@db:5432/contracts
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - hf_cache:/hf_cache
+      - app_cache:/app/data/cache
+
+  web:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  hf_cache:
+  app_cache:

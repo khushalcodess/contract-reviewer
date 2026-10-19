@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+python-multipart
+psycopg[binary]
+pgvector
+numpy
+sentence-transformers
+rank_bm25
+pydantic
+openai
+python-dotenv
+pdfplumber
+python-docx
+pyjwt
+argon2-cffi
