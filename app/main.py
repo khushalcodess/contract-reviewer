@@ -28,6 +28,7 @@ chunker = partial(clause_chunks, max_size=1500)
 USER_DAILY_LIMIT = int(os.getenv("USER_DAILY_LIMIT", "5"))
 GLOBAL_DAILY_LIMIT = int(os.getenv("GLOBAL_DAILY_LIMIT", "40"))
 KEEP_DAYS = int(os.getenv("KEEP_DAYS", "7"))
+ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
 
 async def _cleanup_loop():
     while True:
@@ -50,7 +51,7 @@ app = FastAPI(title="Contract Risk Reviewer", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )

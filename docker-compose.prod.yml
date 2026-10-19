@@ -3,9 +3,10 @@ name: contract-prod
 services:
   db:
     image: pgvector/pgvector:pg16
+    restart: unless-stopped
     environment:
       POSTGRES_USER: contracts
-      POSTGRES_PASSWORD: contracts_dev
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
       POSTGRES_DB: contracts
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -18,9 +19,10 @@ services:
 
   api:
     build: .
+    restart: unless-stopped
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://contracts:contracts_dev@db:5432/contracts
+      DATABASE_URL: postgresql://contracts:${DB_PASSWORD}@db:5432/contracts
     depends_on:
       db:
         condition: service_healthy
@@ -30,6 +32,7 @@ services:
 
   web:
     build: ./frontend
+    restart: unless-stopped
     ports:
       - "8080:80"
     depends_on:
