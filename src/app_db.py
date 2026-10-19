@@ -5,15 +5,12 @@ from psycopg.types.json import Jsonb
 from src.db import connect
 
 SCHEMA = """
-
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-ALTER TABLE contracts ADD COLUMN IF NOT EXISTS user_id INT REFERENCES users(id) ON DELETE CASCADE;
-
 CREATE TABLE IF NOT EXISTS contracts (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
@@ -25,6 +22,7 @@ CREATE TABLE IF NOT EXISTS contracts (
     error TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE contracts ADD COLUMN IF NOT EXISTS user_id INT REFERENCES users(id) ON DELETE CASCADE;
 CREATE TABLE IF NOT EXISTS findings (
     id SERIAL PRIMARY KEY,
     contract_id INT NOT NULL REFERENCES contracts(id) ON DELETE CASCADE,
@@ -185,3 +183,24 @@ def contract_owner(contract_id):
             "SELECT user_id FROM contracts WHERE id = %s", (contract_id,)
         ).fetchone()
     return row[0] if row else None
+
+def count_uploads(user_id=None, hours=24):
+    sql = "SELECT COUNT(*) FROM contracts WHERE created_at > now() - make_interval(hours => %s)"
+    params = [hours]
+    if user_id is not None:
+        sql += " AND user_id = %s"
+        params.append(user_id)
+    with connect() as conn:
+        return conn.execute(sql, params).fetchone()[0]
+
+
+def delete_old_contracts(days):
+    with connect() as conn:
+        conn.execute(
+            "DELETE FROM contracts WHERE created_at < now() - make_interval(days => %s)",
+            (days,),
+        )
+        conn.execute(
+            "DELETE FROM chunks WHERE left(contract_title, 7) = 'upload-' "
+            "AND contract_title NOT IN (SELECT title FROM contracts)"
+        )

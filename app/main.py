@@ -5,7 +5,8 @@ from contextlib import asynccontextmanager
 from functools import partial
 from pathlib import Path
 from typing import Literal
-
+import asyncio
+import os
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -24,12 +25,25 @@ from src.pipeline import review_contract
 TAG = "clause-200-1500-200"
 EVAL_DIR = Path(__file__).resolve().parent.parent / "eval"
 chunker = partial(clause_chunks, max_size=1500)
+USER_DAILY_LIMIT = int(os.getenv("USER_DAILY_LIMIT", "5"))
+GLOBAL_DAILY_LIMIT = int(os.getenv("GLOBAL_DAILY_LIMIT", "40"))
+KEEP_DAYS = int(os.getenv("KEEP_DAYS", "7"))
+
+async def _cleanup_loop():
+    while True:
+        try:
+            await asyncio.to_thread(app_db.delete_old_contracts, KEEP_DAYS)
+        except Exception as e:
+            print("cleanup failed:", e)
+        await asyncio.sleep(3600)
 
 
 @asynccontextmanager
 async def lifespan(app):
     app_db.init_app_schema()
+    task = asyncio.create_task(_cleanup_loop())
     yield
+    task.cancel()
 
 
 app = FastAPI(title="Contract Risk Reviewer", lifespan=lifespan)
@@ -119,6 +133,11 @@ def health():
 @app.post("/contracts")
 def upload(background: BackgroundTasks, file: UploadFile = File(...),
            customer: str = Form(""), uid: int = Depends(current_user)):
+    if app_db.count_uploads(uid) >= USER_DAILY_LIMIT:
+        raise HTTPException(429, f"Daily limit reached ({USER_DAILY_LIMIT} uploads per day). Try again tomorrow.")
+    if app_db.count_uploads() >= GLOBAL_DAILY_LIMIT:
+        raise HTTPException(429, "The demo has reached its daily limit. Please try again tomorrow.")
+
     data = file.file.read(MAX_BYTES + 1)
     try:
         text, page_starts = extract_text(file.filename or "", data)

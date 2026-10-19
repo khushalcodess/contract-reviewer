@@ -7,7 +7,9 @@ client = TestClient(app)
 
 
 @pytest.fixture
-def as_user():
+def as_user(monkeypatch):
+    from src import app_db
+    monkeypatch.setattr(app_db, "count_uploads", lambda user_id=None, hours=24: 0)
     app.dependency_overrides[current_user] = lambda: 1
     yield
     app.dependency_overrides.clear()
@@ -77,3 +79,17 @@ def test_login_wrong_password(monkeypatch):
                         lambda e: (1, auth.hash_password("rightpassword")))
     r = client.post("/auth/login", json={"email": "a@b.com", "password": "wrongpassword"})
     assert r.status_code == 401
+
+def test_user_daily_limit_blocks_upload(as_user, monkeypatch):
+    from src import app_db
+    monkeypatch.setattr(app_db, "count_uploads", lambda user_id=None, hours=24: 999)
+    r = client.post("/contracts", files={"file": ("x.txt", b"abc")})
+    assert r.status_code == 429
+
+
+def test_global_daily_limit_blocks_upload(as_user, monkeypatch):
+    from src import app_db
+    monkeypatch.setattr(app_db, "count_uploads",
+                        lambda user_id=None, hours=24: 0 if user_id is not None else 999)
+    r = client.post("/contracts", files={"file": ("x.txt", b"abc")})
+    assert r.status_code == 429
