@@ -15,5 +15,7 @@ def load_thresholds(path=THRESHOLD_FILE):
 
 
 def clause_is_present(clause, signals, thresholds):
-    rule = thresholds[clause]
+    rule = thresholds.get(clause)
+    if rule is None or rule["signal"] is None:
+        return True
     return signals[rule["signal"]] >= rule["threshold"]
