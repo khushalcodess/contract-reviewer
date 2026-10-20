@@ -33,12 +33,27 @@ services:
   web:
     build: ./frontend
     restart: unless-stopped
-    ports:
-      - "${WEB_PORT:-8080}:80"
     depends_on:
       - api
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
 
 volumes:
   pgdata:
   hf_cache:
   app_cache:
+  caddy_data:
+  caddy_config:
